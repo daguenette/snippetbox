@@ -3,12 +3,11 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
 
 	files := []string{
@@ -19,19 +18,17 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 		return
 	}
 
 	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 	}
 }
 
-func snippetViewHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetViewHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -40,11 +37,11 @@ func snippetViewHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Snippet %d", id)
 }
 
-func snippetFormHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetFormHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Display form..."))
 }
 
-func snippetCreateHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetCreateHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Save new snippet"))
 }
